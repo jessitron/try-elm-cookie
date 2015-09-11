@@ -54,7 +54,7 @@ console.log("returning: v" + output.value)
   }   
 
   return localRuntime.Native.Cookie.values = {
-    set: F2(set),
+    set: set,
     get: get
   };
 
