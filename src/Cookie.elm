@@ -1,4 +1,4 @@
-module Cookie(get, set, Cookie) where
+module Cookie(get, set, Cookie, writeCookie, readCookie) where
 
 {-| Everyone needs cookies sometime
 
@@ -6,6 +6,7 @@ module Cookie(get, set, Cookie) where
 
  -}
 import Task exposing (Task)
+import Effects exposing (Effects)
 import Native.Cookie
 
 type alias Cookie = 
@@ -26,3 +27,30 @@ set = Native.Cookie.set
 
 get: String -> Task String (Maybe Cookie)
 get = Native.Cookie.get
+
+
+writeCookie : (String -> action) -> (Cookie -> action) -> Cookie -> Effects action
+writeCookie failureConstructor successConstructor cookie =
+  let
+    interpreter result = 
+      case result of
+        Ok ok   -> successConstructor ok
+        Err err -> failureConstructor err
+  in
+  set cookie
+  |> Task.toResult
+  |> Task.map interpreter
+  |> Effects.task
+
+readCookie : (String -> action) -> (Maybe Cookie -> action) -> String -> Effects action
+readCookie failureConstructor successConstructor key =
+  let
+    interpreter result = 
+      case result of
+        Ok ok   -> successConstructor ok
+        Err err -> failureConstructor err
+  in
+  get key 
+  |> Task.toResult
+  |> Task.map interpreter
+  |> Effects.task

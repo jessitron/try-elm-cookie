@@ -6,7 +6,7 @@ import Html.Events as Events
 import Signal exposing (Address)
 import Effects exposing (Effects, Never)
 import Task exposing (Task)
-import Cookie exposing (Cookie)
+import Cookie exposing (Cookie, writeCookie, readCookie)
 import StartApp
 
 app = StartApp.start 
@@ -70,30 +70,5 @@ writeMyCookie str = writeCookie Failure (\_ -> SetOk) { key = cookieKey, value =
 readMyCookie: String -> Effects Action
 readMyCookie = readCookie (\a -> Failure ("while reading: " ++ a)) Cookie
 
-writeCookie : (String -> action) -> (Cookie -> action) -> Cookie -> Effects action
-writeCookie failureConstructor successConstructor cookie =
-  let
-    interpreter result = 
-      case result of
-        Ok ok   -> successConstructor ok
-        Err err -> failureConstructor err
-  in
-  Cookie.set cookie
-  |> Task.toResult
-  |> Task.map interpreter
-  |> Effects.task
-
-readCookie : (String -> action) -> (Maybe Cookie -> action) -> String -> Effects action
-readCookie failureConstructor successConstructor key =
-  let
-    interpreter result = 
-      case result of
-        Ok ok   -> successConstructor ok
-        Err err -> failureConstructor err
-  in
-  Cookie.get key 
-  |> Task.toResult
-  |> Task.map interpreter
-  |> Effects.task
 
 

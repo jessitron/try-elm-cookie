@@ -797,6 +797,7 @@ Elm.Cookie.make = function (_elm) {
    _L = _N.List.make(_elm),
    $moduleName = "Cookie",
    $Basics = Elm.Basics.make(_elm),
+   $Effects = Elm.Effects.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Native$Cookie = Elm.Native.Cookie.make(_elm),
@@ -804,7 +805,43 @@ Elm.Cookie.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $Task = Elm.Task.make(_elm);
    var get = $Native$Cookie.get;
+   var readCookie = F3(function (failureConstructor,
+   successConstructor,
+   key) {
+      return function () {
+         var interpreter = function (result) {
+            return function () {
+               switch (result.ctor)
+               {case "Err":
+                  return failureConstructor(result._0);
+                  case "Ok":
+                  return successConstructor(result._0);}
+               _U.badCase($moduleName,
+               "between lines 49 and 52");
+            }();
+         };
+         return $Effects.task($Task.map(interpreter)($Task.toResult(get(key))));
+      }();
+   });
    var set = $Native$Cookie.set;
+   var writeCookie = F3(function (failureConstructor,
+   successConstructor,
+   cookie) {
+      return function () {
+         var interpreter = function (result) {
+            return function () {
+               switch (result.ctor)
+               {case "Err":
+                  return failureConstructor(result._0);
+                  case "Ok":
+                  return successConstructor(result._0);}
+               _U.badCase($moduleName,
+               "between lines 36 and 39");
+            }();
+         };
+         return $Effects.task($Task.map(interpreter)($Task.toResult(set(cookie))));
+      }();
+   });
    var Cookie = F2(function (a,b) {
       return {_: {}
              ,key: a
@@ -813,6 +850,8 @@ Elm.Cookie.make = function (_elm) {
    _elm.Cookie.values = {_op: _op
                         ,get: get
                         ,set: set
+                        ,writeCookie: writeCookie
+                        ,readCookie: readCookie
                         ,Cookie: Cookie};
    return _elm.Cookie.values;
 };
@@ -13096,42 +13135,6 @@ Elm.TryIt.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $StartApp = Elm.StartApp.make(_elm),
    $Task = Elm.Task.make(_elm);
-   var readCookie = F3(function (failureConstructor,
-   successConstructor,
-   key) {
-      return function () {
-         var interpreter = function (result) {
-            return function () {
-               switch (result.ctor)
-               {case "Err":
-                  return failureConstructor(result._0);
-                  case "Ok":
-                  return successConstructor(result._0);}
-               _U.badCase($moduleName,
-               "between lines 90 and 93");
-            }();
-         };
-         return $Effects.task($Task.map(interpreter)($Task.toResult($Cookie.get(key))));
-      }();
-   });
-   var writeCookie = F3(function (failureConstructor,
-   successConstructor,
-   cookie) {
-      return function () {
-         var interpreter = function (result) {
-            return function () {
-               switch (result.ctor)
-               {case "Err":
-                  return failureConstructor(result._0);
-                  case "Ok":
-                  return successConstructor(result._0);}
-               _U.badCase($moduleName,
-               "between lines 77 and 80");
-            }();
-         };
-         return $Effects.task($Task.map(interpreter)($Task.toResult($Cookie.set(cookie))));
-      }();
-   });
    var Failure = function (a) {
       return {ctor: "Failure"
              ,_0: a};
@@ -13141,7 +13144,7 @@ Elm.TryIt.make = function (_elm) {
       return {ctor: "Cookie"
              ,_0: a};
    };
-   var readMyCookie = A2(readCookie,
+   var readMyCookie = A2($Cookie.readCookie,
    function (a) {
       return Failure(A2($Basics._op["++"],
       "while reading: ",
@@ -13190,9 +13193,9 @@ Elm.TryIt.make = function (_elm) {
               ,setCount: 0};
    var cookieKey = "potato";
    var writeMyCookie = function (str) {
-      return A3(writeCookie,
+      return A3($Cookie.writeCookie,
       Failure,
-      function (_v6) {
+      function (_v0) {
          return function () {
             return SetOk;
          }();
@@ -13271,9 +13274,7 @@ Elm.TryIt.make = function (_elm) {
                        ,Failure: Failure
                        ,update: update
                        ,writeMyCookie: writeMyCookie
-                       ,readMyCookie: readMyCookie
-                       ,writeCookie: writeCookie
-                       ,readCookie: readCookie};
+                       ,readMyCookie: readMyCookie};
    return _elm.TryIt.values;
 };
 Elm.VirtualDom = Elm.VirtualDom || {};
