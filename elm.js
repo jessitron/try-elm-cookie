@@ -5613,7 +5613,7 @@ Elm.Native.Cookie.make = function(localRuntime) {
     var newValue = howToGetACookie(key)
     if (newValue === value)
     {
-      return Task.succeed({key: key, value: value});  
+      return Task.succeed({k: key, v: value});  
     } else {
       return Task.fail("cookie " + setcommand + " was not set. It holds <" + newValue + ">")
     }
@@ -5631,7 +5631,7 @@ Elm.Native.Cookie.make = function(localRuntime) {
       console.log("returning: " + output)
       console.log("returning: k" + output.key)
 console.log("returning: v" + output.value)
-      return Task.succeed(Maybe.Just({key: key, value: value}));
+      return Task.succeed(Maybe.Just({k: key, v: value}));
     }
   }   
 
