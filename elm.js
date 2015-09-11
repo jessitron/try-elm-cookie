@@ -13160,19 +13160,36 @@ Elm.TryIt.make = function (_elm) {
    var Input = function (a) {
       return {ctor: "Input",_0: a};
    };
+   var padding = function (amt) {
+      return $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
+                                                  ,_0: "padding"
+                                                  ,_1: A2($Basics._op["++"],
+                                                  $Basics.toString(amt),
+                                                  "px")}]));
+   };
    var divc = function (content) {
       return A2($Html.div,
-      _L.fromArray([$Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
-                                                         ,_0: "padding"
-                                                         ,_1: "5px"}]))]),
+      _L.fromArray([padding(5)]),
       _L.fromArray([content]));
+   };
+   var displayCountText = function (model) {
+      return $Html.text(A2($Basics._op["++"],
+      "set ",
+      A2($Basics._op["++"],
+      $Basics.toString(model.setCount),
+      " times")));
+   };
+   var displayCookieText = function (model) {
+      return $Html.text(A2($Basics._op["++"],
+      "The cookie contains: ",
+      A2($Maybe.withDefault,
+      "--",
+      model.cookie)));
    };
    var view = F2(function (address,
    model) {
       return A2($Html.div,
-      _L.fromArray([$Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
-                                                         ,_0: "padding"
-                                                         ,_1: "50px"}]))]),
+      _L.fromArray([padding(50)]),
       _L.fromArray([divc(A2($Html.input,
                    _L.fromArray([$Html$Attributes.value(model.input)
                                 ,A3($Html$Events.on,
@@ -13182,16 +13199,8 @@ Elm.TryIt.make = function (_elm) {
                                    return $Signal.message(address)(Input($));
                                 })]),
                    _L.fromArray([])))
-                   ,divc($Html.text(A2($Basics._op["++"],
-                   "The cookie contains: ",
-                   A2($Maybe.withDefault,
-                   "--",
-                   model.cookie))))
-                   ,divc($Html.text(A2($Basics._op["++"],
-                   "set ",
-                   A2($Basics._op["++"],
-                   $Basics.toString(model.setCount),
-                   " times"))))]));
+                   ,divc(displayCookieText(model))
+                   ,divc(displayCountText(model))]));
    });
    var init = {_: {}
               ,cookie: $Maybe.Nothing
@@ -13241,7 +13250,7 @@ Elm.TryIt.make = function (_elm) {
                    model)
                    ,_1: readMyCookie(cookieKey)};}
          _U.badCase($moduleName,
-         "between lines 61 and 65");
+         "between lines 76 and 96");
       }();
    });
    var Model = F3(function (a,
@@ -13269,7 +13278,10 @@ Elm.TryIt.make = function (_elm) {
                        ,cookieKey: cookieKey
                        ,init: init
                        ,view: view
+                       ,displayCookieText: displayCookieText
+                       ,displayCountText: displayCountText
                        ,divc: divc
+                       ,padding: padding
                        ,Input: Input
                        ,CookieValue: CookieValue
                        ,SetOk: SetOk
