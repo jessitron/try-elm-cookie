@@ -6,7 +6,7 @@ import Html.Events as Events
 import Signal exposing (Address)
 import Effects exposing (Effects, Never)
 import Task exposing (Task)
-import Cookie exposing (Cookie, writeCookie, readCookie)
+import Cookie exposing (writeCookie, readCookie)
 import StartApp
 
 app = StartApp.start 
