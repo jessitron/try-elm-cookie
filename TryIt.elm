@@ -6,12 +6,12 @@ import Html.Events as Events
 import Signal exposing (Address)
 import Effects exposing (Effects, Never)
 import Task exposing (Task)
-import Cookie
+import Cookie exposing (Cookie)
 import StartApp
 
 app = StartApp.start 
   {
-  init = (init, readCookie ()),
+  init = (init, readCookie cookieKey),
   update = update,
   view = view,
   inputs = []
@@ -53,22 +53,28 @@ divc content = Html.div [] [content]
 -- UPDATE
 type Action = 
     Input String
-  | Cookie (Maybe String)
+  | Cookie (Maybe Cookie)
   | SetOk
   | Failure String
 
 update action model = 
   case action of
-    Input str -> ({model | input <- str}, writeCookie str )
-    SetOk -> ({model | setCount <- (model.setCount + 1)}, readCookie ())
+    Input str -> ({model | input <- str}, writeCookie Failure (\_ -> SetOk) {key = cookieKey, value = str} )
+    SetOk -> ({model | setCount <- (model.setCount + 1)}, readCookie cookieKey)
     Failure boo -> ({model | cookie <- Just ("FAILURE: " ++ boo)}, Effects.none)
-    Cookie c -> ({model | cookie <- c}, Effects.none)
+    Cookie c -> ({model | cookie <- (Maybe.map .value c)}, Effects.none)
 
-writeCookie : String -> Effects Action
-writeCookie str =
-  Cookie.set cookieKey str
+writeCookie : (String -> action) -> (Cookie -> action) -> Cookie -> Effects action
+writeCookie failureConstructor successConstructor coo =
+  let
+    interpreter result = 
+      case result of
+        Ok ok   -> successConstructor ok
+        Err err -> failureConstructor err
+  in
+  Cookie.set coo
   |> Task.toResult
-  |> Task.map hooray
+  |> Task.map interpreter
   |> Effects.task
 
 hooray result =
@@ -76,9 +82,9 @@ hooray result =
     Ok butt  -> SetOk
     Err face -> Failure face
 
-readCookie : () -> Effects Action
-readCookie _ =
-  Cookie.get cookieKey
+readCookie : String -> Effects Action
+readCookie key =
+  Cookie.get key 
   |> Task.toResult
   |> Task.map huzzah
   |> Effects.task

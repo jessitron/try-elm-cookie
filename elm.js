@@ -805,9 +805,15 @@ Elm.Cookie.make = function (_elm) {
    $Task = Elm.Task.make(_elm);
    var get = $Native$Cookie.get;
    var set = $Native$Cookie.set;
+   var Cookie = F2(function (a,b) {
+      return {_: {}
+             ,key: a
+             ,value: b};
+   });
    _elm.Cookie.values = {_op: _op
                         ,get: get
-                        ,set: set};
+                        ,set: set
+                        ,Cookie: Cookie};
    return _elm.Cookie.values;
 };
 Elm.Debug = Elm.Debug || {};
@@ -13084,6 +13090,24 @@ Elm.TryIt.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $StartApp = Elm.StartApp.make(_elm),
    $Task = Elm.Task.make(_elm);
+   var writeCookie = F3(function (failureConstructor,
+   successConstructor,
+   coo) {
+      return function () {
+         var interpreter = function (result) {
+            return function () {
+               switch (result.ctor)
+               {case "Err":
+                  return failureConstructor(result._0);
+                  case "Ok":
+                  return successConstructor(result._0);}
+               _U.badCase($moduleName,
+               "between lines 71 and 74");
+            }();
+         };
+         return $Effects.task($Task.map(interpreter)($Task.toResult($Cookie.set(coo))));
+      }();
+   });
    var Failure = function (a) {
       return {ctor: "Failure"
              ,_0: a};
@@ -13096,7 +13120,7 @@ Elm.TryIt.make = function (_elm) {
             return Failure(result._0);
             case "Ok": return SetOk;}
          _U.badCase($moduleName,
-         "between lines 75 and 77");
+         "between lines 81 and 83");
       }();
    };
    var Cookie = function (a) {
@@ -13113,8 +13137,11 @@ Elm.TryIt.make = function (_elm) {
             case "Ok":
             return Cookie(result._0);}
          _U.badCase($moduleName,
-         "between lines 87 and 89");
+         "between lines 93 and 95");
       }();
+   };
+   var readCookie = function (key) {
+      return $Effects.task($Task.map(huzzah)($Task.toResult($Cookie.get(key))));
    };
    var Input = function (a) {
       return {ctor: "Input",_0: a};
@@ -13151,16 +13178,6 @@ Elm.TryIt.make = function (_elm) {
               ,input: ""
               ,setCount: 0};
    var cookieKey = "potato";
-   var writeCookie = function (str) {
-      return $Effects.task($Task.map(hooray)($Task.toResult(A2($Cookie.set,
-      cookieKey,
-      str))));
-   };
-   var readCookie = function (_v6) {
-      return function () {
-         return $Effects.task($Task.map(huzzah)($Task.toResult($Cookie.get(cookieKey))));
-      }();
-   };
    var update = F2(function (action,
    model) {
       return function () {
@@ -13168,7 +13185,11 @@ Elm.TryIt.make = function (_elm) {
          {case "Cookie":
             return {ctor: "_Tuple2"
                    ,_0: _U.replace([["cookie"
-                                    ,action._0]],
+                                    ,A2($Maybe.map,
+                                    function (_) {
+                                       return _.value;
+                                    },
+                                    action._0)]],
                    model)
                    ,_1: $Effects.none};
             case "Failure":
@@ -13184,13 +13205,22 @@ Elm.TryIt.make = function (_elm) {
                    ,_0: _U.replace([["input"
                                     ,action._0]],
                    model)
-                   ,_1: writeCookie(action._0)};
+                   ,_1: A3(writeCookie,
+                   Failure,
+                   function (_v13) {
+                      return function () {
+                         return SetOk;
+                      }();
+                   },
+                   {_: {}
+                   ,key: cookieKey
+                   ,value: action._0})};
             case "SetOk":
             return {ctor: "_Tuple2"
                    ,_0: _U.replace([["setCount"
                                     ,model.setCount + 1]],
                    model)
-                   ,_1: readCookie({ctor: "_Tuple0"})};}
+                   ,_1: readCookie(cookieKey)};}
          _U.badCase($moduleName,
          "between lines 61 and 65");
       }();
@@ -13206,7 +13236,7 @@ Elm.TryIt.make = function (_elm) {
    var app = $StartApp.start({_: {}
                              ,init: {ctor: "_Tuple2"
                                     ,_0: init
-                                    ,_1: readCookie({ctor: "_Tuple0"})}
+                                    ,_1: readCookie(cookieKey)}
                              ,inputs: _L.fromArray([])
                              ,update: update
                              ,view: view});
