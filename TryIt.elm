@@ -3,7 +3,7 @@ module TryIt where
 import Html exposing (Html)
 import Html.Attributes as Attr
 import Html.Events as Events
-import Signal exposing (Address)
+import Signal
 import Effects exposing (Effects, Never)
 import Task exposing (Task)
 import Cookie exposing (writeCookie, readCookie)
