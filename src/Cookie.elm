@@ -10,8 +10,8 @@ import Native.Cookie
 
 type alias Cookie = 
   {
-    k: String,
-    v: String
+    key: String,
+    value: String
   }
 
 {-| Set a cookie. 
@@ -21,7 +21,7 @@ type alias Cookie =
 
     TODO: error constructor?
  -}
-set: Cookie -> Task String Cookie
+set: String -> String -> Task String Cookie
 set = Native.Cookie.set
 
 get: String -> Task String (Maybe Cookie)

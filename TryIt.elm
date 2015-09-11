@@ -11,7 +11,7 @@ import StartApp
 
 app = StartApp.start 
   {
-  init = (init, readCookie cookieKey),
+  init = (init, readCookie),
   update = update,
   view = view,
   inputs = []
@@ -60,9 +60,9 @@ type Action =
 update action model = 
   case action of
     Input str -> ({model | input <- str}, writeCookie Failure (\_ -> SetOk) cookieKey str )
-    SetOk -> ({model | setCount <- (model.setCount + 1)}, readCookie cookieKey)
+    SetOk -> ({model | setCount <- (model.setCount + 1)}, readCookie)
     Failure boo -> ({model | cookie <- Just ("FAILURE: " ++ boo)}, Effects.none)
-    Cookie c -> ({model | cookie <- (Maybe.map .v c)}, Effects.none)
+    Cookie c -> ({model | cookie <- (Maybe.map .value c)}, Effects.none)
 
 writeCookie : (String -> action) -> (Cookie -> action) -> String -> String -> Effects action
 writeCookie failureConstructor successConstructor coo kie =
@@ -72,7 +72,7 @@ writeCookie failureConstructor successConstructor coo kie =
         Ok ok   -> successConstructor ok
         Err err -> failureConstructor err
   in
-  Cookie.set {k = coo, v = kie}
+  Cookie.set coo kie
   |> Task.toResult
   |> Task.map interpreter
   |> Effects.task
@@ -82,9 +82,9 @@ hooray result =
     Ok butt  -> SetOk
     Err face -> Failure face
 
-readCookie : String -> Effects Action
-readCookie key =
-  Cookie.get key 
+readCookie : Effects Action
+readCookie  =
+  Cookie.get cookieKey 
   |> Task.toResult
   |> Task.map huzzah
   |> Effects.task

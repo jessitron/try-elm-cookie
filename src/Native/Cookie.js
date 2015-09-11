@@ -21,17 +21,15 @@ Elm.Native.Cookie.make = function(localRuntime) {
     return decodeURIComponent(document.cookie.replace(new RegExp("(?:(?:^|.*;)\\s*" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1")) || null;
   }
 
-  function set(co) 
+  function set(key, value) 
   {
     console.log("set triggered")
-    key = co.k
-    value = co.v
     var setcommand = encodeURIComponent(key) + "=" + encodeURIComponent(value)
     document.cookie = setcommand
     var newValue = howToGetACookie(key)
     if (newValue === value)
     {
-      return Task.succeed({k: key, v: value});  
+      return Task.succeed({key: key, value: value});  
     } else {
       return Task.fail("cookie " + setcommand + " was not set. It holds <" + newValue + ">")
     }
@@ -49,7 +47,7 @@ Elm.Native.Cookie.make = function(localRuntime) {
       console.log("returning: " + output)
       console.log("returning: k" + output.key)
 console.log("returning: v" + output.value)
-      return Task.succeed(Maybe.Just({k: key, v: value}));
+      return Task.succeed(Maybe.Just({key: key, value: value}));
     }
   }   
 
