@@ -21,8 +21,10 @@ Elm.Native.Cookie.make = function(localRuntime) {
     return decodeURIComponent(document.cookie.replace(new RegExp("(?:(?:^|.*;)\\s*" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1")) || null;
   }
 
-  function set(key, value) 
+  function set(co) 
   {
+    key = co.key;
+    value = co.value;
     console.log("set triggered")
     var setcommand = encodeURIComponent(key) + "=" + encodeURIComponent(value)
     document.cookie = setcommand

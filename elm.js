@@ -5605,8 +5605,10 @@ Elm.Native.Cookie.make = function(localRuntime) {
     return decodeURIComponent(document.cookie.replace(new RegExp("(?:(?:^|.*;)\\s*" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1")) || null;
   }
 
-  function set(key, value) 
+  function set(co) 
   {
+    key = co.key;
+    value = co.value;
     console.log("set triggered")
     var setcommand = encodeURIComponent(key) + "=" + encodeURIComponent(value)
     document.cookie = setcommand
@@ -13086,161 +13088,34 @@ Elm.TryIt.make = function (_elm) {
    $Cookie = Elm.Cookie.make(_elm),
    $Effects = Elm.Effects.make(_elm),
    $Html = Elm.Html.make(_elm),
-   $Html$Attributes = Elm.Html.Attributes.make(_elm),
-   $Html$Events = Elm.Html.Events.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $StartApp = Elm.StartApp.make(_elm),
    $Task = Elm.Task.make(_elm);
-   var writeCookie = F4(function (failureConstructor,
-   successConstructor,
-   coo,
-   kie) {
-      return function () {
-         var interpreter = function (result) {
-            return function () {
-               switch (result.ctor)
-               {case "Err":
-                  return failureConstructor(result._0);
-                  case "Ok":
-                  return successConstructor(result._0);}
-               _U.badCase($moduleName,
-               "between lines 71 and 74");
-            }();
-         };
-         return $Effects.task($Task.map(interpreter)($Task.toResult(A2($Cookie.set,
-         coo,
-         kie))));
-      }();
+   var update = F2(function (action,
+   model) {
+      return {ctor: "_Tuple2"
+             ,_0: model
+             ,_1: $Effects.none};
    });
-   var Failure = function (a) {
-      return {ctor: "Failure"
-             ,_0: a};
-   };
-   var SetOk = {ctor: "SetOk"};
-   var hooray = function (result) {
-      return function () {
-         switch (result.ctor)
-         {case "Err":
-            return Failure(result._0);
-            case "Ok": return SetOk;}
-         _U.badCase($moduleName,
-         "between lines 81 and 83");
-      }();
-   };
-   var Cookie = function (a) {
-      return {ctor: "Cookie"
-             ,_0: a};
-   };
-   var huzzah = function (result) {
-      return function () {
-         switch (result.ctor)
-         {case "Err":
-            return Failure(A2($Basics._op["++"],
-              " while reading! ",
-              result._0));
-            case "Ok":
-            return Cookie(result._0);}
-         _U.badCase($moduleName,
-         "between lines 93 and 95");
-      }();
-   };
-   var Input = function (a) {
-      return {ctor: "Input",_0: a};
-   };
-   var divc = function (content) {
-      return A2($Html.div,
-      _L.fromArray([]),
-      _L.fromArray([content]));
-   };
    var view = F2(function (address,
    model) {
       return A2($Html.div,
       _L.fromArray([]),
-      _L.fromArray([divc(A2($Html.input,
-                   _L.fromArray([$Html$Attributes.value(model.input)
-                                ,A3($Html$Events.on,
-                                "input",
-                                $Html$Events.targetValue,
-                                function ($) {
-                                   return $Signal.message(address)(Input($));
-                                })]),
-                   _L.fromArray([])))
-                   ,divc($Html.text(A2($Maybe.withDefault,
-                   "--",
-                   model.cookie)))
-                   ,divc($Html.text(A2($Basics._op["++"],
-                   "set ",
-                   A2($Basics._op["++"],
-                   $Basics.toString(model.setCount),
-                   " times"))))]));
+      _L.fromArray([]));
    });
-   var init = {_: {}
-              ,cookie: $Maybe.Nothing
-              ,input: ""
-              ,setCount: 0};
+   var init = {_: {}};
    var cookieKey = "potato";
-   var readCookie = $Effects.task($Task.map(huzzah)($Task.toResult($Cookie.get(cookieKey))));
-   var update = F2(function (action,
-   model) {
-      return function () {
-         switch (action.ctor)
-         {case "Cookie":
-            return {ctor: "_Tuple2"
-                   ,_0: _U.replace([["cookie"
-                                    ,A2($Maybe.map,
-                                    function (_) {
-                                       return _.value;
-                                    },
-                                    action._0)]],
-                   model)
-                   ,_1: $Effects.none};
-            case "Failure":
-            return {ctor: "_Tuple2"
-                   ,_0: _U.replace([["cookie"
-                                    ,$Maybe.Just(A2($Basics._op["++"],
-                                    "FAILURE: ",
-                                    action._0))]],
-                   model)
-                   ,_1: $Effects.none};
-            case "Input":
-            return {ctor: "_Tuple2"
-                   ,_0: _U.replace([["input"
-                                    ,action._0]],
-                   model)
-                   ,_1: A4(writeCookie,
-                   Failure,
-                   function (_v13) {
-                      return function () {
-                         return SetOk;
-                      }();
-                   },
-                   cookieKey,
-                   action._0)};
-            case "SetOk":
-            return {ctor: "_Tuple2"
-                   ,_0: _U.replace([["setCount"
-                                    ,model.setCount + 1]],
-                   model)
-                   ,_1: readCookie};}
-         _U.badCase($moduleName,
-         "between lines 61 and 65");
-      }();
-   });
-   var Model = F3(function (a,
-   b,
-   c) {
-      return {_: {}
-             ,cookie: b
-             ,input: a
-             ,setCount: c};
-   });
+   var writeCookie = $Effects.task($Task.toResult($Cookie.set({_: {}
+                                                              ,key: cookieKey
+                                                              ,value: "value-o"})));
+   var Model = {_: {}};
    var app = $StartApp.start({_: {}
                              ,init: {ctor: "_Tuple2"
-                                    ,_0: init
-                                    ,_1: readCookie}
+                                    ,_0: {_: {}}
+                                    ,_1: writeCookie}
                              ,inputs: _L.fromArray([])
                              ,update: update
                              ,view: view});
@@ -13254,16 +13129,8 @@ Elm.TryIt.make = function (_elm) {
                        ,cookieKey: cookieKey
                        ,init: init
                        ,view: view
-                       ,divc: divc
-                       ,Input: Input
-                       ,Cookie: Cookie
-                       ,SetOk: SetOk
-                       ,Failure: Failure
                        ,update: update
-                       ,writeCookie: writeCookie
-                       ,hooray: hooray
-                       ,readCookie: readCookie
-                       ,huzzah: huzzah};
+                       ,writeCookie: writeCookie};
    return _elm.TryIt.values;
 };
 Elm.VirtualDom = Elm.VirtualDom || {};

@@ -43,7 +43,7 @@ update action model = (model, Effects.none)
 
 writeCookie : Effects Action
 writeCookie =
-  Cookie.set cookieKey "value-o"
+  Cookie.set { key = cookieKey, value =  "value-o" }
   |> Task.toResult
   |> Effects.task
 
