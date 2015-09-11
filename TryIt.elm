@@ -39,16 +39,16 @@ init = {
  }
 
 -- VIEW
-view address model = Html.div []
+view address model = Html.div [Attr.style [("padding", "50px")]]
        [
          divc (Html.input [Attr.value model.input,
                      Events.on "input" Events.targetValue (Signal.message address << Input)] []),
-         divc( Html.text (Maybe.withDefault "--" model.cookie)),
+         divc( Html.text ("The cookie contains: " ++ (Maybe.withDefault "--" model.cookie))),
          divc(Html.text ("set " ++ (toString model.setCount) ++ " times"))
 
        ]
 
-divc content = Html.div [] [content]
+divc content = Html.div [Attr.style [("padding", "5px")]] [content]
 
 -- UPDATE
 type Action = 
@@ -59,20 +59,20 @@ type Action =
 
 update action model = 
   case action of
-    Input str -> ({model | input <- str}, writeCookie Failure (\_ -> SetOk) cookieKey str )
+    Input str -> ({model | input <- str}, writeCookie Failure (\_ -> SetOk) { key = cookieKey, value = str } )
     SetOk -> ({model | setCount <- (model.setCount + 1)}, readCookie cookieKey)
     Failure boo -> ({model | cookie <- Just ("FAILURE: " ++ boo)}, Effects.none)
-    Cookie c -> ({model | cookie <- (Maybe.map .v c)}, Effects.none)
+    Cookie c -> ({model | cookie <- (Maybe.map .value c)}, Effects.none)
 
-writeCookie : (String -> action) -> (Cookie -> action) -> String -> String -> Effects action
-writeCookie failureConstructor successConstructor coo kie =
+writeCookie : (String -> action) -> (Cookie -> action) -> Cookie -> Effects action
+writeCookie failureConstructor successConstructor cookie =
   let
     interpreter result = 
       case result of
         Ok ok   -> successConstructor ok
         Err err -> failureConstructor err
   in
-  Cookie.set {k = coo, v = kie}
+  Cookie.set cookie
   |> Task.toResult
   |> Task.map interpreter
   |> Effects.task

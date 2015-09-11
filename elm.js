@@ -806,7 +806,9 @@ Elm.Cookie.make = function (_elm) {
    var get = $Native$Cookie.get;
    var set = $Native$Cookie.set;
    var Cookie = F2(function (a,b) {
-      return {_: {},k: a,v: b};
+      return {_: {}
+             ,key: a
+             ,value: b};
    });
    _elm.Cookie.values = {_op: _op
                         ,get: get
@@ -5606,8 +5608,8 @@ Elm.Native.Cookie.make = function(localRuntime) {
   function set(co) 
   {
     console.log("set triggered")
-    key = co.k
-    value = co.v
+    key = co.key
+    value = co.value
     var setcommand = encodeURIComponent(key) + "=" + encodeURIComponent(value)
     document.cookie = setcommand
     var newValue = howToGetACookie(key)
@@ -5631,12 +5633,12 @@ Elm.Native.Cookie.make = function(localRuntime) {
       console.log("returning: " + output)
       console.log("returning: k" + output.key)
 console.log("returning: v" + output.value)
-      return Task.succeed(Maybe.Just({k: key, v: value}));
+      return Task.succeed(Maybe.Just(output));
     }
   }   
 
   return localRuntime.Native.Cookie.values = {
-    set: F2(set),
+    set: set,
     get: get
   };
 
@@ -13094,10 +13096,9 @@ Elm.TryIt.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $StartApp = Elm.StartApp.make(_elm),
    $Task = Elm.Task.make(_elm);
-   var writeCookie = F4(function (failureConstructor,
+   var writeCookie = F3(function (failureConstructor,
    successConstructor,
-   coo,
-   kie) {
+   cookie) {
       return function () {
          var interpreter = function (result) {
             return function () {
@@ -13110,9 +13111,7 @@ Elm.TryIt.make = function (_elm) {
                "between lines 71 and 74");
             }();
          };
-         return $Effects.task($Task.map(interpreter)($Task.toResult($Cookie.set({_: {}
-                                                                                ,k: coo
-                                                                                ,v: kie}))));
+         return $Effects.task($Task.map(interpreter)($Task.toResult($Cookie.set(cookie))));
       }();
    });
    var Failure = function (a) {
@@ -13155,13 +13154,17 @@ Elm.TryIt.make = function (_elm) {
    };
    var divc = function (content) {
       return A2($Html.div,
-      _L.fromArray([]),
+      _L.fromArray([$Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
+                                                         ,_0: "padding"
+                                                         ,_1: "5px"}]))]),
       _L.fromArray([content]));
    };
    var view = F2(function (address,
    model) {
       return A2($Html.div,
-      _L.fromArray([]),
+      _L.fromArray([$Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
+                                                         ,_0: "padding"
+                                                         ,_1: "50px"}]))]),
       _L.fromArray([divc(A2($Html.input,
                    _L.fromArray([$Html$Attributes.value(model.input)
                                 ,A3($Html$Events.on,
@@ -13171,9 +13174,11 @@ Elm.TryIt.make = function (_elm) {
                                    return $Signal.message(address)(Input($));
                                 })]),
                    _L.fromArray([])))
-                   ,divc($Html.text(A2($Maybe.withDefault,
+                   ,divc($Html.text(A2($Basics._op["++"],
+                   "The cookie contains: ",
+                   A2($Maybe.withDefault,
                    "--",
-                   model.cookie)))
+                   model.cookie))))
                    ,divc($Html.text(A2($Basics._op["++"],
                    "set ",
                    A2($Basics._op["++"],
@@ -13194,7 +13199,7 @@ Elm.TryIt.make = function (_elm) {
                    ,_0: _U.replace([["cookie"
                                     ,A2($Maybe.map,
                                     function (_) {
-                                       return _.v;
+                                       return _.value;
                                     },
                                     action._0)]],
                    model)
@@ -13212,15 +13217,16 @@ Elm.TryIt.make = function (_elm) {
                    ,_0: _U.replace([["input"
                                     ,action._0]],
                    model)
-                   ,_1: A4(writeCookie,
+                   ,_1: A3(writeCookie,
                    Failure,
                    function (_v13) {
                       return function () {
                          return SetOk;
                       }();
                    },
-                   cookieKey,
-                   action._0)};
+                   {_: {}
+                   ,key: cookieKey
+                   ,value: action._0})};
             case "SetOk":
             return {ctor: "_Tuple2"
                    ,_0: _U.replace([["setCount"

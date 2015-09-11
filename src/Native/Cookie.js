@@ -24,8 +24,8 @@ Elm.Native.Cookie.make = function(localRuntime) {
   function set(co) 
   {
     console.log("set triggered")
-    key = co.k
-    value = co.v
+    key = co.key
+    value = co.value
     var setcommand = encodeURIComponent(key) + "=" + encodeURIComponent(value)
     document.cookie = setcommand
     var newValue = howToGetACookie(key)
@@ -49,12 +49,12 @@ Elm.Native.Cookie.make = function(localRuntime) {
       console.log("returning: " + output)
       console.log("returning: k" + output.key)
 console.log("returning: v" + output.value)
-      return Task.succeed(Maybe.Just({k: key, v: value}));
+      return Task.succeed(Maybe.Just(output));
     }
   }   
 
   return localRuntime.Native.Cookie.values = {
-    set: F2(set),
+    set: set,
     get: get
   };
 

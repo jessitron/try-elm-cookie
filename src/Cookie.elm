@@ -10,8 +10,8 @@ import Native.Cookie
 
 type alias Cookie = 
   {
-    k: String,
-    v: String
+    key: String,
+    value: String
   }
 
 {-| Set a cookie. 
