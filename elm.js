@@ -5613,9 +5613,9 @@ Elm.Native.Cookie.make = function(localRuntime) {
     var newValue = howToGetACookie(key)
     if (newValue === value)
     {
-      return Task.succeed(newValue);  
+      return Task.succeed({key: key, value: value});  
     } else {
-      return Task.fail("cookie " + setcommand + " was not set. It is <" + newValue + ">")
+      return Task.fail("cookie " + setcommand + " was not set. It holds <" + newValue + ">")
     }
    
   }
@@ -5627,7 +5627,11 @@ Elm.Native.Cookie.make = function(localRuntime) {
     if (!value) {
       return Task.succeed(Maybe.Nothing);
     } else {
-      return Task.succeed(Maybe.Just(value));
+      var output = {key: key, value: value};
+      console.log("returning: " + output)
+      console.log("returning: k" + output.key)
+console.log("returning: v" + output.value)
+      return Task.succeed(Maybe.Just({key: key, value: value}));
     }
   }   
 
@@ -13090,9 +13094,10 @@ Elm.TryIt.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $StartApp = Elm.StartApp.make(_elm),
    $Task = Elm.Task.make(_elm);
-   var writeCookie = F3(function (failureConstructor,
+   var writeCookie = F4(function (failureConstructor,
    successConstructor,
-   coo) {
+   coo,
+   kie) {
       return function () {
          var interpreter = function (result) {
             return function () {
@@ -13105,7 +13110,9 @@ Elm.TryIt.make = function (_elm) {
                "between lines 71 and 74");
             }();
          };
-         return $Effects.task($Task.map(interpreter)($Task.toResult($Cookie.set(coo))));
+         return $Effects.task($Task.map(interpreter)($Task.toResult(A2($Cookie.set,
+         coo,
+         kie))));
       }();
    });
    var Failure = function (a) {
@@ -13205,16 +13212,15 @@ Elm.TryIt.make = function (_elm) {
                    ,_0: _U.replace([["input"
                                     ,action._0]],
                    model)
-                   ,_1: A3(writeCookie,
+                   ,_1: A4(writeCookie,
                    Failure,
                    function (_v13) {
                       return function () {
                          return SetOk;
                       }();
                    },
-                   {_: {}
-                   ,key: cookieKey
-                   ,value: action._0})};
+                   cookieKey,
+                   action._0)};
             case "SetOk":
             return {ctor: "_Tuple2"
                    ,_0: _U.replace([["setCount"

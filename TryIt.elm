@@ -59,20 +59,20 @@ type Action =
 
 update action model = 
   case action of
-    Input str -> ({model | input <- str}, writeCookie Failure (\_ -> SetOk) {key = cookieKey, value = str} )
+    Input str -> ({model | input <- str}, writeCookie Failure (\_ -> SetOk) cookieKey str )
     SetOk -> ({model | setCount <- (model.setCount + 1)}, readCookie cookieKey)
     Failure boo -> ({model | cookie <- Just ("FAILURE: " ++ boo)}, Effects.none)
     Cookie c -> ({model | cookie <- (Maybe.map .value c)}, Effects.none)
 
-writeCookie : (String -> action) -> (Cookie -> action) -> Cookie -> Effects action
-writeCookie failureConstructor successConstructor coo =
+writeCookie : (String -> action) -> (Cookie -> action) -> String -> String -> Effects action
+writeCookie failureConstructor successConstructor coo kie =
   let
     interpreter result = 
       case result of
         Ok ok   -> successConstructor ok
         Err err -> failureConstructor err
   in
-  Cookie.set coo
+  Cookie.set coo kie
   |> Task.toResult
   |> Task.map interpreter
   |> Effects.task
