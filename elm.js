@@ -13140,17 +13140,23 @@ Elm.TryIt.make = function (_elm) {
              ,_0: a};
    };
    var SetOk = {ctor: "SetOk"};
-   var Cookie = function (a) {
-      return {ctor: "Cookie"
+   var CookieValue = function (a) {
+      return {ctor: "CookieValue"
              ,_0: a};
    };
    var readMyCookie = A2($Cookie.readCookie,
-   function (a) {
+   function (boo) {
       return Failure(A2($Basics._op["++"],
       "while reading: ",
-      a));
+      boo));
    },
-   Cookie);
+   function (yay) {
+      return CookieValue(A2($Maybe.map,
+      function (_) {
+         return _.value;
+      },
+      yay));
+   });
    var Input = function (a) {
       return {ctor: "Input",_0: a};
    };
@@ -13208,14 +13214,10 @@ Elm.TryIt.make = function (_elm) {
    model) {
       return function () {
          switch (action.ctor)
-         {case "Cookie":
+         {case "CookieValue":
             return {ctor: "_Tuple2"
                    ,_0: _U.replace([["cookie"
-                                    ,A2($Maybe.map,
-                                    function (_) {
-                                       return _.value;
-                                    },
-                                    action._0)]],
+                                    ,action._0]],
                    model)
                    ,_1: $Effects.none};
             case "Failure":
@@ -13269,7 +13271,7 @@ Elm.TryIt.make = function (_elm) {
                        ,view: view
                        ,divc: divc
                        ,Input: Input
-                       ,Cookie: Cookie
+                       ,CookieValue: CookieValue
                        ,SetOk: SetOk
                        ,Failure: Failure
                        ,update: update

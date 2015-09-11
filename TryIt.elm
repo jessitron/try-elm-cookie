@@ -53,7 +53,7 @@ divc content = Html.div [Attr.style [("padding", "5px")]] [content]
 -- UPDATE
 type Action = 
     Input String
-  | Cookie (Maybe Cookie)
+  | CookieValue (Maybe String)
   | SetOk
   | Failure String
 
@@ -62,13 +62,13 @@ update action model =
     Input str -> ({model | input <- str}, writeMyCookie str )
     SetOk -> ({model | setCount <- (model.setCount + 1)}, readMyCookie cookieKey)
     Failure boo -> ({model | cookie <- Just ("FAILURE: " ++ boo)}, Effects.none)
-    Cookie c -> ({model | cookie <- (Maybe.map .value c)}, Effects.none)
+    CookieValue c -> ({model | cookie <- c}, Effects.none)
 
 writeMyCookie: String -> Effects Action
 writeMyCookie str = writeCookie Failure (\_ -> SetOk) { key = cookieKey, value = str }
 
 readMyCookie: String -> Effects Action
-readMyCookie = readCookie (\a -> Failure ("while reading: " ++ a)) Cookie
+readMyCookie = readCookie (\boo -> Failure ("while reading: " ++ boo)) (\yay -> CookieValue (Maybe.map .value yay))
 
 
 
