@@ -11,7 +11,7 @@ import StartApp
 
 app = StartApp.start 
   {
-  init = (init, readCookie cookieKey),
+  init = (init, readMyCookie cookieKey),
   update = update,
   view = view,
   inputs = []
@@ -59,10 +59,16 @@ type Action =
 
 update action model = 
   case action of
-    Input str -> ({model | input <- str}, writeCookie Failure (\_ -> SetOk) { key = cookieKey, value = str } )
-    SetOk -> ({model | setCount <- (model.setCount + 1)}, readCookie cookieKey)
+    Input str -> ({model | input <- str}, writeMyCookie str )
+    SetOk -> ({model | setCount <- (model.setCount + 1)}, readMyCookie cookieKey)
     Failure boo -> ({model | cookie <- Just ("FAILURE: " ++ boo)}, Effects.none)
     Cookie c -> ({model | cookie <- (Maybe.map .value c)}, Effects.none)
+
+writeMyCookie: String -> Effects Action
+writeMyCookie str = writeCookie Failure (\_ -> SetOk) { key = cookieKey, value = str }
+
+readMyCookie: String -> Effects Action
+readMyCookie = readCookie (\a -> Failure ("while reading: " ++ a)) Cookie
 
 writeCookie : (String -> action) -> (Cookie -> action) -> Cookie -> Effects action
 writeCookie failureConstructor successConstructor cookie =
@@ -77,21 +83,17 @@ writeCookie failureConstructor successConstructor cookie =
   |> Task.map interpreter
   |> Effects.task
 
-hooray result =
-  case result of
-    Ok butt  -> SetOk
-    Err face -> Failure face
-
-readCookie : String -> Effects Action
-readCookie key =
+readCookie : (String -> action) -> (Maybe Cookie -> action) -> String -> Effects action
+readCookie failureConstructor successConstructor key =
+  let
+    interpreter result = 
+      case result of
+        Ok ok   -> successConstructor ok
+        Err err -> failureConstructor err
+  in
   Cookie.get key 
   |> Task.toResult
-  |> Task.map huzzah
+  |> Task.map interpreter
   |> Effects.task
-
-huzzah result =
-  case result of
-    Ok butt  -> Cookie butt
-    Err face -> Failure (" while reading! " ++ face)
 
 
