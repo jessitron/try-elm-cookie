@@ -62,7 +62,7 @@ update action model =
     Input str -> ({model | input <- str}, writeCookie Failure (\_ -> SetOk) cookieKey str )
     SetOk -> ({model | setCount <- (model.setCount + 1)}, readCookie cookieKey)
     Failure boo -> ({model | cookie <- Just ("FAILURE: " ++ boo)}, Effects.none)
-    Cookie c -> ({model | cookie <- (Maybe.map .value c)}, Effects.none)
+    Cookie c -> ({model | cookie <- (Maybe.map .v c)}, Effects.none)
 
 writeCookie : (String -> action) -> (Cookie -> action) -> String -> String -> Effects action
 writeCookie failureConstructor successConstructor coo kie =
@@ -72,7 +72,7 @@ writeCookie failureConstructor successConstructor coo kie =
         Ok ok   -> successConstructor ok
         Err err -> failureConstructor err
   in
-  Cookie.set coo kie
+  Cookie.set {k = coo, v = kie}
   |> Task.toResult
   |> Task.map interpreter
   |> Effects.task

@@ -806,9 +806,7 @@ Elm.Cookie.make = function (_elm) {
    var get = $Native$Cookie.get;
    var set = $Native$Cookie.set;
    var Cookie = F2(function (a,b) {
-      return {_: {}
-             ,key: a
-             ,value: b};
+      return {_: {},k: a,v: b};
    });
    _elm.Cookie.values = {_op: _op
                         ,get: get
@@ -5605,9 +5603,11 @@ Elm.Native.Cookie.make = function(localRuntime) {
     return decodeURIComponent(document.cookie.replace(new RegExp("(?:(?:^|.*;)\\s*" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1")) || null;
   }
 
-  function set(key, value) 
+  function set(co) 
   {
     console.log("set triggered")
+    key = co.k
+    value = co.v
     var setcommand = encodeURIComponent(key) + "=" + encodeURIComponent(value)
     document.cookie = setcommand
     var newValue = howToGetACookie(key)
@@ -13110,9 +13110,9 @@ Elm.TryIt.make = function (_elm) {
                "between lines 71 and 74");
             }();
          };
-         return $Effects.task($Task.map(interpreter)($Task.toResult(A2($Cookie.set,
-         coo,
-         kie))));
+         return $Effects.task($Task.map(interpreter)($Task.toResult($Cookie.set({_: {}
+                                                                                ,k: coo
+                                                                                ,v: kie}))));
       }();
    });
    var Failure = function (a) {
@@ -13194,7 +13194,7 @@ Elm.TryIt.make = function (_elm) {
                    ,_0: _U.replace([["cookie"
                                     ,A2($Maybe.map,
                                     function (_) {
-                                       return _.value;
+                                       return _.v;
                                     },
                                     action._0)]],
                    model)
