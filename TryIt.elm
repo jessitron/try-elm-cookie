@@ -107,7 +107,6 @@ writeMyCookie str =
 readMyCookie: String -> Effects Action
 readMyCookie = 
   readCookie 
-    (\boo -> Failure ("while reading: " ++ boo)) 
     (\yay -> CookieValue (Maybe.map .value yay))
 
 

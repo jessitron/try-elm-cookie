@@ -805,23 +805,9 @@ Elm.Cookie.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $Task = Elm.Task.make(_elm);
    var get = $Native$Cookie.get;
-   var readCookie = F3(function (failureConstructor,
-   successConstructor,
+   var readCookie = F2(function (successConstructor,
    key) {
-      return function () {
-         var interpreter = function (result) {
-            return function () {
-               switch (result.ctor)
-               {case "Err":
-                  return failureConstructor(result._0);
-                  case "Ok":
-                  return successConstructor(result._0);}
-               _U.badCase($moduleName,
-               "between lines 49 and 52");
-            }();
-         };
-         return $Effects.task($Task.map(interpreter)($Task.toResult(get(key))));
-      }();
+      return $Effects.task($Task.map(successConstructor)(get(key)));
    });
    var set = $Native$Cookie.set;
    var writeCookie = F3(function (failureConstructor,
@@ -836,7 +822,7 @@ Elm.Cookie.make = function (_elm) {
                   case "Ok":
                   return successConstructor(result._0);}
                _U.badCase($moduleName,
-               "between lines 36 and 39");
+               "between lines 57 and 60");
             }();
          };
          return $Effects.task($Task.map(interpreter)($Task.toResult(set(cookie))));
@@ -13144,13 +13130,7 @@ Elm.TryIt.make = function (_elm) {
       return {ctor: "CookieValue"
              ,_0: a};
    };
-   var readMyCookie = A2($Cookie.readCookie,
-   function (boo) {
-      return Failure(A2($Basics._op["++"],
-      "while reading: ",
-      boo));
-   },
-   function (yay) {
+   var readMyCookie = $Cookie.readCookie(function (yay) {
       return CookieValue(A2($Maybe.map,
       function (_) {
          return _.value;
