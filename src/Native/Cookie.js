@@ -22,7 +22,7 @@ Elm.Native.Cookie.make = function(localRuntime) {
   }
 
   function set(key, value) 
-  {
+  { 
     console.log("set triggered")
     var setcommand = encodeURIComponent(key) + "=" + encodeURIComponent(value)
     document.cookie = setcommand
