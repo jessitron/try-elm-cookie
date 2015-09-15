@@ -22,33 +22,37 @@ Elm.Native.Cookie.make = function(localRuntime) {
   }
 
   function set(key, value) 
-  { 
-    console.log("set triggered")
-    var setcommand = encodeURIComponent(key) + "=" + encodeURIComponent(value)
-    document.cookie = setcommand
-    var newValue = howToGetACookie(key)
-    if (newValue === value)
-    {
-      return Task.succeed({key: key, value: value});  
-    } else {
-      return Task.fail("cookie " + setcommand + " was not set. It holds <" + newValue + ">")
-    }
+  {   
+    return Task.asyncFunction(function(callback) {
+      console.log("set triggered")
+      var setcommand = encodeURIComponent(key) + "=" + encodeURIComponent(value)
+      document.cookie = setcommand
+      var newValue = howToGetACookie(key)
+      if (newValue === value)
+      {
+        callback(Task.succeed({key: key, value: value}));  
+      } else {
+        callback(Task.fail("cookie " + setcommand + " was not set. It holds <" + newValue + ">"));
+      }
+    });
    
   }
 
   function get(key)
   {
-    console.log ("get triggered")
-    var value = howToGetACookie(key)
-    if (!value) {
-      return Task.succeed(Maybe.Nothing);
-    } else {
-      var output = {key: key, value: value};
-      console.log("returning: " + output)
-      console.log("returning: k" + output.key)
-console.log("returning: v" + output.value)
-      return Task.succeed(Maybe.Just({key: key, value: value}));
-    }
+    return Task.asyncFunction(function(callback) {
+      console.log ("get triggered")
+      var value = howToGetACookie(key)
+      if (!value) {
+        return Task.succeed(Maybe.Nothing);
+      } else {
+        var output = {key: key, value: value};
+        console.log("returning: " + output)
+        console.log("returning: k" + output.key)
+        console.log("returning: v" + output.value)
+        callback(Task.succeed(Maybe.Just({key: key, value: value})));
+      }
+    });
   }   
 
   return localRuntime.Native.Cookie.values = {
